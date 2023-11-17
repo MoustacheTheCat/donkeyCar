@@ -91,4 +91,5 @@ step 6 Create file
     Run File                 -> ./createFileAndFolder.sh       
 
 step 7 Creates header.php with the nav bar and footer
+
 step 8 git add . / git commit -m "step 7" /git push // and go to bed   
