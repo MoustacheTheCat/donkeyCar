@@ -39,6 +39,35 @@ function getEmail(){
     }
     return $tabEmails;
 }
+function getEmailCustomer(){
+    $pdo = connect_bd();
+    $queryC = $pdo->prepare('SELECT customerId, customerEmail FROM customers ');
+    $queryC->execute();
+    $emailCustomers = $queryC->fetchAll(PDO::FETCH_ASSOC);
+    $tabEmails = array();
+    foreach ($emailCustomers as $key => $emailCustomer) {
+        if ($emailCustomer['customerId'] < 10){
+            $emailCustomer['customerId'] = '0'.$emailCustomer['customerId'];
+        }
+        $tabEmails[] = $emailCustomer['customerId'].'_'.$emailCustomer['customerEmail'];
+    }
+    return $tabEmails;
+}
+function verifEmail($email){
+    $dataUsers = getEmailCustomer();
+    $data = array();
+    foreach($dataUsers as $dataUser){
+        if(substr($dataUser,3) == $email){
+            if(substr($dataUser,0,2) < 10){
+                $data[] = substr($dataUser,1,1);
+            }
+            else{
+                $data[] = substr($dataUser,0,2);
+            }
+        }
+    }
+    return $data;
+}
 function getEmailAndRole(){
     $pdo = connect_bd();
     $queryA = $pdo->prepare('SELECT adminEmail FROM admins ');
@@ -274,6 +303,15 @@ function getValidRent($id){
     return $datas;
 }
 
+function getRent($id){
+    $pdo = connect_bd();
+    $query = $pdo->prepare( "SELECT l.*, c.carName,c.carId, b.brandName FROM locationValidationAdmin lva JOIN locationValidation lv ON lv.locationValidationId = lva.locationValidationId JOIN location l ON l.locationId = lv.locationId JOIN carLocation cl ON cl.locationId = l.locationId JOIN cars c ON c.carId = cl.carId JOIN brands b ON c.brandId = b.brandId  WHERE l.locationId = :id");
+    $query->bindValue(':id', $id, PDO::PARAM_INT);
+    $query->execute();
+    $datas = $query->fetch(PDO::FETCH_ASSOC);
+    return $datas;
+}
+
 function printCustomerName($id)  {
     $pdo = connect_bd();
     $query = $pdo->prepare('SELECT customerFirstName, customerLastName FROM customers WHERE customerId = :id');
@@ -292,6 +330,49 @@ function printMarketName($id)  {
     $data = $query->fetch(PDO::FETCH_ASSOC);
     $name = $data['marketName'];    
     return $name;
+}
+
+function getMarketsGarages(){
+    $pdo = connect_bd();
+    $query = $pdo->prepare('SELECT m.*, g.garageName, g.garageId FROM garages g JOIN markets m ON g.marketId = m.marketId ORDER BY m.marketCity ASC');
+    $query->execute();
+    $datas = $query->fetchAll(PDO::FETCH_ASSOC);
+    return $datas;
+}
+
+function getOneMarketsGarages($id, $col){
+    $pdo = connect_bd();
+    $query = $pdo->prepare('SELECT m.*, g.garageName, g.garageId FROM garages g JOIN markets m ON g.marketId = m.marketId WHERE g.'.$col.'=:id ORDER BY m.marketCity ASC');
+    $query->bindValue(':id', $id, PDO::PARAM_INT);
+    $query->execute();
+    $datas = $query->fetch(PDO::FETCH_ASSOC);
+    return $datas;
+}
+
+function messageRead($id, $idAdmin){
+    $message = getOneRow('messages', 'messageId', $id);
+    if($message['messageStatus'] == 0){
+        $pdo = connect_bd();
+        $query = $pdo->prepare('UPDATE donkeyCar.messages SET messageStatus = 1 WHERE messageId = :messageId');
+        $query->bindValue(':messageId', $id);
+        $query->execute();
+        $query = $pdo->prepare('INSERT INTO donkeyCar.messageAdmin (messageId, adminId) VALUES(:messageId, :adminId)');
+        $query->bindValue(':messageId', $id);
+        $query->bindValue(':adminId', $idAdmin);
+        $query->execute();
+    }
+    return $message;
+}
+
+function countMessageNoRead(){
+    $dataM = getAllData('messages');
+    $countNotread = 0;
+    foreach ($dataM as $data) {
+        if($data['messageStatus'] == 0){
+            $countNotread++;
+        }
+    }
+    return $countNotread;
 }
 
 
@@ -344,6 +425,36 @@ function printTableHome($city, $cars){
     ');
 }
 
+function verifTypeBrand($data, $type){
+    if($type == 'brand'){
+        $brands = getAllData('brands');
+        foreach ($brands as $brand) {
+            if($brand['brandName'] == $data){
+                return $brand['brandId'];
+            }
+        }
+    }
+    elseif ($type == 'type') {
+        $types = getAllData('typeCar');
+        foreach ($types as $type) {
+            if($type['typeCarName'] == $data){
+                return $type['typeCarId'];
+            }
+        }
+    }
+    return true;
+}
+
+function verifImat($data){
+    $cars = getAllData('cars');
+    foreach ($cars as $car) {
+        if($car['carImmatriculation'] == $data){
+            return false;
+        }
+    }
+    return true;
+}
+
 // function print filter 
 
 function filterCityCountry(){
@@ -352,10 +463,10 @@ function filterCityCountry(){
     echo ('
         <div class="col-md-8">
             <form action="action/actionFilter.php" method="POST">   
-                <div class="row justify-content-center">
+                <div class="row justify-content-center mb-4">
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="selectCity">'.ucfirst('city').'</label>
+                        <div class="input-group">
+                            <label for="selectCity"></label>
                             <select name="selectCity" id="selectCity" class="form-select" aria-label="Floating label select example">
                                 <option value="city">'.ucfirst('city').'</option> ');
                                 foreach ($marketCitys as $marketCity){
@@ -363,11 +474,7 @@ function filterCityCountry(){
                                 }
                             echo ('
                             </select>
-                        </div> 
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="selectCountry">'.ucfirst('country').'</label>
+                            <label for="selectCountry"></label>
                             <select name="selectCountry" id="selectCountry" class="form-select" aria-label="Floating label select example">
                                 <option value="country">'.ucfirst('country').'</option> ');
                                 foreach ($marketCountrys as $marketCountry ){
@@ -375,11 +482,7 @@ function filterCityCountry(){
                                 }
                         echo ('
                             </select>
-                        </div> 
-                    </div>
-                    <div class="row justify-content-center mt-3">
-                        <div class="col-md-2">
-                            <input type="submit" class="btn btn-primary btn-block" value="Envoyer" name="filterCountryCity">
+                            <input type="submit" class="btn btn-outline-primary" value="search" name="filterCountryCity">
                         </div>
                     </div>
                 </div>
@@ -397,9 +500,9 @@ function filterTypeYear(){
         <div class="col-md-8">
             <form action="action/actionFilter.php" method="POST">  
                 <div class="row justify-content-center">
-                    <div class="col-md-6"> 
-                        <div class="mb-3">
-                            <label for="selectType">'.ucfirst('type').'</label>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <label for="selectType"></label>
                             <select name="selectType" id="selectType" class="form-select" aria-label="Floating label select example">
                                 <option value="type">'.ucfirst('type').'</option> ');
                                 foreach ($dataTypes as $dataType ){
@@ -407,11 +510,7 @@ function filterTypeYear(){
                                 }
                         echo ('
                             </select>
-                        </div> 
-                    </div>
-                    <div class="col-md-6"> 
-                        <div class="mb-3">
-                            <label for="selectYear">'.ucfirst('year').'</label>
+                            <label for="selectYear"></label>
                             <select name="selectYear" id="selectYear" class="form-select" aria-label="Floating label select example">
                                 <option value="year">'.ucfirst('year').'</option> ');
                                 foreach ($dataYears as $dataYear){
@@ -419,11 +518,7 @@ function filterTypeYear(){
                                 }
                         echo ('
                             </select>
-                        </div> 
-                    </div>
-                    <div class="row justify-content-center mt-3">
-                        <div class="col-md-2">
-                            <input type="submit" class="btn btn-primary" value="Envoyer" name="filterTypeYear">
+                            <input type="submit" class="btn btn-outline-primary" value="search" name="filterTypeYear">
                         </div>
                     </div>
                 </div>

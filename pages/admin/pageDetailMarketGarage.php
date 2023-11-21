@@ -1,62 +1,76 @@
 <?php
 require('../../action/action.php');
 if(!empty($_GET['type']) && $_GET['type'] == 'market'){
-    $dataMarkets = getOneRow('markets', 'marketId', $_GET['id']);
-    $pageTitle = 'detail Market';
+    $col = 'marketId';
 }elseif(!empty($_GET['type']) && $_GET['type'] == 'garage'){
-    $dataGarages = getOneRow('garages', 'garageId', $_GET['id']);
-    $dataMarkets = getOneRow('markets', 'marketId', $dataGarages['marketId']);
-    $marketName = $dataMarkets['marketName'];
-    $garageName = $dataGarages['garageName'];
-    $pageTitle = 'detail Garage';
+    $col = 'garageId';
 }
+$pageTitle = 'Detail of Market and Garage';
+$datas = getOneMarketsGarages($_GET['id'], $col);
 include('../../layout/header.php');
-
 ?>
-<?php if(!empty($_GET['type']) && $_GET['type'] == 'market'):?>
-    <div class="container mt-5">
-        <div class="card mb-3">
-            <div class="card-body">
-                <h3 class="card-title"><?= $dataMarkets['marketName']; ?> </h3>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">City: <?= $dataMarkets['marketCity']; ?></li>
-                    <li class="list-group-item">Address: <?= $dataMarkets['marketAdress']; ?></li>
-                    <li class="list-group-item">Postal Code: <?= $dataMarkets['marketZip']; ?></li>
-                    <li class="list-group-item">Country: <?= $dataMarkets['marketCountry']; ?></li>
-                </ul>
+<div class="container-fluid md-2">
+    <section class="h-100 gradient-custom-2">
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col col-lg-9 col-xl-7">
+                    <div class="card">
+                        <div class="rounded-top text-white d-flex flex-row" style="background-color: #000; height:200px;">
+                            <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px;">
+                                <img src="https://pluspng.com/img-png/user-png-icon-big-image-png-2240.png" alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2" style="width: 150px; z-index: 1">
+                            </div>
+                            <div class="ms-3" style="margin-top: 130px;">
+                                <h5><?= $datas['marketName']; ?></h5>
+                            </div>
+                        </div>
+                        <div class="p-4 text-black" style="background-color: #f8f9fa;">
+                            <div class="d-flex justify-content-end text-center py-1">
+                                <div>
+                                    <button type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1;">
+                                        <a href="admin/pageEditMarketGarage.php?id=<?= $datas['marketId']?>">Edit Market</a>
+                                    </button>
+                                </div>
+                                <div class="px-3">
+                                    <button type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1;">
+                                    <a href="#?id=<?=$datas['marketId']?>">Delete Market</a>
+                                    </button>
+                                </div>  
+                            </div>
+                        </div>
+                        <div class="card-body p-4 text-black">
+                            <div class="mb-5">
+                                <h5 class="mb-3">Information</h5>
+                                <div class="p-4" style="background-color: #f8f9fa;">
+                                    <h6>About market</h6>
+                                    <p class="font-italic mb-1"><?= $datas['marketAdress']; ?><</p>
+                                    <p class="font-italic mb-1"><?= $datas['marketCity']; ?></p>
+                                    <p class="font-italic mb-1"><?= $datas['marketZip']; ?></li></p>
+                                    <p class="font-italic mb-1"><?= $datas['marketCountry']; ?></p>
+                                </div>
+                                <div class="p-4" style="background-color: #f8f9fa;">
+                                    <h6>About garage</h6>
+                                    <p class="font-italic mb-1">@ : <?= $datas['garageName']?></p>
+                                    <div class="p-4 text-black" style="background-color: #f8f9fa;">
+                                        <div class="d-flex justify-content-start text-center py-1">
+                                            <div>
+                                                <button type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1;">
+                                                    <a href="admin/pageEditMarketGarage.php?id=<?= $datas['garageId']?>">Edit Garage</a>
+                                                </button>
+                                            </div>
+                                            <div class="px-3">
+                                                <button type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1;">
+                                                    <a href="#?id=<?= $datas['garageId']?>">Delete Garage</a>
+                                                </button>
+                                            </div>  
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="row justify-content-center mt-3">
-        <div class="col-md-2">
-            <a href="admin/pageEditMarketGarage.php?id=<?= $dataMarkets['marketId']?>">Edit Market</a>
-        </div>
-        <div class="col-md-2">
-            <a href="#?id=<?=$dataMarkets['marketId']?>">Delete Market</a>
-        </div>
-    </div>
-<?php elseif(!empty($_GET['type']) && $_GET['type'] == 'garage'):?>
-    <div class="container mt-5">
-        <div class="card mb-3">
-            <div class="card-body">
-                <h3 class="card-title"><?= $garageName; ?> </h3>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Market: <?= $marketName; ?></li>
-                    <li class="list-group-item">City: <?= $dataMarkets['marketCity']; ?></li>
-                    <li class="list-group-item">Address: <?= $dataMarkets['marketAdress']; ?></li>
-                    <li class="list-group-item">Postal Code: <?= $dataMarkets['marketZip']; ?></li>
-                    <li class="list-group-item">Country: <?= $dataMarkets['marketCountry']; ?></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="row justify-content-center mt-3">
-        <div class="col-md-2">
-            <a href="admin/pageEditMarketGarage.php?id=<?= $dataGarages['garageId']?>">Edit Garage</a>
-        </div>
-        <div class="col-md-2">
-            <a href="#?id=<?= $dataGarages['garageId']?>">Delete Garage</a>
-        </div>
-    </div>
-<?php endif;?>
+    </section>
+</div>
 <?php include('../../layout/footer.php');?>

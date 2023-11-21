@@ -33,9 +33,9 @@ $dataRents = getValidRent($id);
         <tbody>
             <?php foreach ($dataRents as $dataRent) :?>
                 <tr>
-                    <td><a href="http://donkeycar.com/pages/pageDetailRent.php?id=<?= $dataRent['locationId'] ?>"><?= $dataRent['locationId'] ?></a></td>
+                    <td><a href="http://donkeycar.com/pages/pageDetailRental.php?id=<?= $dataRent['locationId'] ?>"><?= $dataRent['locationId'] ?></a></td>
                     <td><a href="http://donkeycar.com/pages/pageProfil.php?role=customer&id=<?= $dataRent['customerId']?>"><?= printCustomerName($dataRent['customerId']) ?></a></td>
-                    <td><?= printMarketName($dataRent['marketId']) ?></td>
+                    <td> <a href="http://donkeycar.com/pages/admin/pageDetailMarketGarage.php?id=<?=$dataRent['marketId']?>&type=market"><?= printMarketName($dataRent['marketId']) ?></a></td>
                     <td><?= $dataRent['brandName'] ?></td>
                     <td><a href="http://donkeycar.com/pages/pageDetailCar.php?id=<?= $dataRent['carId'] ?>"><?= $dataRent['carName'] ?></a></td>
                     <td><?= $dataRent['locationType'] ?></td>

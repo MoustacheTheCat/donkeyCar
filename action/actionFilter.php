@@ -5,7 +5,7 @@ unset($_SESSION['messageResponce']);
 unset($_SESSION['cars']);
 unset($_SESSION['nbMarkets']);
 if($_SERVER["REQUEST_METHOD"] === "POST"){
-    if(isset($_POST['filterCountryCity']) && $_POST['filterCountryCity'] == "Envoyer"){
+    if(isset($_POST['filterCountryCity']) && $_POST['filterCountryCity'] == "search"){
         if($_POST['selectCity'] == "city" && $_POST['selectCountry'] == "country"){
             $_SESSION['messageResponce'] =  "You have not chosen a country or a city , please choose a country or a city";
             header('Location: ../index.php');
@@ -43,7 +43,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
             }
         }
     }
-    elseif (isset($_POST['filterTypeYear']) && $_POST['filterTypeYear'] == "Envoyer"){
+    elseif (isset($_POST['filterTypeYear']) && $_POST['filterTypeYear'] == "search"){
         if($_POST['selectYear'] == "year" && $_POST['selectType'] == "type"){
             $_SESSION['messageResponce'] =  "You have not chosen a type or a Year, please choose a year or a type of car or";
             header('Location: ../index.php');

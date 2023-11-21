@@ -5,7 +5,7 @@ include('../../layout/header.php');
 $dataCars = getAllCarWithDetailGarageAndMarketDetail();
 
 ?>
-<div class="container mt-5">
+<div class="container-fluid">
     <h2 class="mb-4">Car Details</h2>
     <table class="table table-bordered">
         <thead>

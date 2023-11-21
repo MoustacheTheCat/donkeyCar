@@ -5,7 +5,6 @@ include('../../layout/header.php');
 $dataMarketsGarages = getAllMarketWithGarage();
 ?>
 <div class="container mt-5">
-    <h2 class="mb-4">Car Details</h2>
     <table class="table table-bordered">
     <table class="table">
     <thead>

@@ -1,33 +1,9 @@
 <?php
 require('../action/action.php');
 $cars = getOnCarInGarageByCarId($_GET['id']);
-$pageTitle = $cars['brandName']." ".$cars['carName'];
+$pageTitle = "Detail Car";
 include('../layout/header.php');
 ?>
-<div class="container">
-    <div class="card">
-        <div class="card-body">
-            <h3 class="card-title">Brand and Model</h3>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">Brand :<?= $cars['brandName'];?></li>
-                <li class="list-group-item">Model :<?= $cars['carName'];?></li>
-            </ul>
-            <h3 class="card-title">Information about the car</h3>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">type : <?= $cars['typeCarName'];?></li>
-                <li class="list-group-item">Year : <?= $cars['carYear'];?></li>
-                <li class="list-group-item">hourly rate : <?= $cars['carTarifHourHT']*1.2;?></li>
-                <li class="list-group-item">daily rate : <?= $cars['carTarifDayHT'] *1.2;?></li>
-                <li class="list-group-item">deposit : <?= $cars['carCaution'];?></li>
-                <?php if($cars['garargeCarDisponibility'] == 0):?>
-                    <li class="list-group-item">Disponibility : Available</li>
-                <?php elseif($cars['garargeCarDisponibility'] == 1):?>
-                    <li class="list-group-item">Disponibility : Unavailable </li>
-                <?php endif;?>
-            </ul>
-        </div>
-    </div>
-</div>
 <div class="container-fluid md-2">
     <section class="h-100 gradient-custom-2">
         <div class="container py-5 h-100">
@@ -36,10 +12,11 @@ include('../layout/header.php');
                     <div class="card">
                         <div class="rounded-top text-white d-flex flex-row" style="background-color: #000; height:200px;">
                             <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px;">
-                                <img src="https://pluspng.com/img-png/user-png-icon-big-image-png-2240.png" alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2" style="width: 150px; z-index: 1">
+                                <img src="https://static.vecteezy.com/system/resources/previews/000/623/239/original/auto-car-logo-template-vector-icon.jpg" alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2" style="width: 150px; z-index: 1">
                             </div>
                             <div class="ms-3" style="margin-top: 130px;">
-                                <h5><?= $cars['brandName'].' '.$cars['carName'];?></h5>
+                                <h5><?= $cars['brandName'];?></h5>
+                                <h5><?= $cars['carName'];?></h5>
                             </div>
                         </div>
                         <div class="p-4 text-black" style="background-color: #f8f9fa;">
@@ -71,21 +48,15 @@ include('../layout/header.php');
                                 <h5 class="mb-3">Information about the car</h5>
                                 <div class="p-4" style="background-color: #f8f9fa;">
                                     <p class="font-italic mb-1">Type :<?= $cars['typeCarName'];?></p>
-                                </div>
-                                <div class="p-4" style="background-color: #f8f9fa;">
-                                    <h6>Info:</h6>
-                                    <p class="font-italic mb-1">@ : <?= $customer['customerEmail']?></p>
-                                    <p class="font-italic mb-0"># : <?= $customer['customerNumber']?></p>
-                                </div>
-                                <div class="p-4" style="background-color: #f8f9fa;">
-                                    <h6>Permis Number:</h6>
-                                    <p class="font-italic mb-1"><?= $customer['customerNumberPermit']?></p>
-                                </div>
-                                <div class="p-4" style="background-color: #f8f9fa;">
-                                    <h6>Address:</h6>
-                                    <p class="font-italic mb-1"><?= $customer['customerAddress']?></p>
-                                    <p class="font-italic mb-1"><?= $customer['customerZip'].' '.$customer['customerCity']?></p>
-                                    <p class="font-italic mb-0"><?= $customer['customerCountry']?></p>
+                                    <p class="font-italic mb-1">Year : <?= $cars['carYear'];?></p>
+                                    <p class="font-italic mb-1">hourly rate : <?= $cars['carTarifHourHT']*1.2;?></p>
+                                    <p class="font-italic mb-0">daily rate : <?= $cars['carTarifDayHT'] *1.2;?></p>
+                                    <p class="font-italic mb-1">deposit : <?= $cars['carCaution'];?></p>
+                                    <?php if($cars['garargeCarDisponibility'] == 0):?>
+                                        <p class="font-italic mb-0">Disponibility : Available</p>
+                                    <?php elseif($cars['garargeCarDisponibility'] == 1):?>
+                                        <p class="font-italic mb-0">Disponibility : Unavailable</p>
+                                    <?php endif;?>
                                 </div>
                             </div>
                         </div>
