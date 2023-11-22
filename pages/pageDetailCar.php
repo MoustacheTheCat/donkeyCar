@@ -12,7 +12,8 @@ include('../layout/header.php');
                     <div class="card">
                         <div class="rounded-top text-white d-flex flex-row" style="background-color: #000; height:200px;">
                             <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px;">
-                                <img src="https://static.vecteezy.com/system/resources/previews/000/623/239/original/auto-car-logo-template-vector-icon.jpg" alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2" style="width: 150px; z-index: 1">
+                                <!-- <img src="https://static.vecteezy.com/system/resources/previews/000/623/239/original/auto-car-logo-template-vector-icon.jpg" alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2" style="width: 150px; z-index: 1"> -->
+                                <img src="https://wallsdesk.com/wp-content/uploads/2016/05/BMW-Logo-PNG.png" alt="Generic placeholder image" class="img-fluid img-thumbnail mt-4 mb-2" style="width: 150px; z-index: 1">
                             </div>
                             <div class="ms-3" style="margin-top: 130px;">
                                 <h5><?= $cars['brandName'];?></h5>
@@ -21,23 +22,19 @@ include('../layout/header.php');
                         </div>
                         <div class="p-4 text-black" style="background-color: #f8f9fa;">
                             <div class="d-flex justify-content-end text-center py-1">
-                                <?php if(($cars['garargeCarDisponibility'] == 0 && !empty($_SESSION['role']) && $_SESSION['role'] == 'customer')|| ($cars['garargeCarDisponibility'] == 0 && empty($_SESSION['role']))):?>
+                                <?php if(($cars['garargeCarDisponibility'] == 0 && !empty($_SESSION['user']) && $_SESSION['user']['role'] == 'customer')|| ($cars['garargeCarDisponibility'] == 0 && empty($_SESSION['user']))):?>
                                     <div>
                                         <form action="customer/pageAskRental.php?id=<?= $cars['carId'];?>" method="POST" class="list-group list-group-flush">
                                             <input type="submit" value="Rental" name="rentalCar" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1;">
                                         </form>
                                     </div>
-                                <?php elseif(!empty($_SESSION['role']) && $_SESSION['role'] == 'admin'):?><div class="row justify-content-center mt-3">
-                                    <div class="row">
+                                <?php elseif(!empty($_SESSION['user']) && $_SESSION['user']['role'] == 'admin'):?>
+                                    <div class="row justify-content-center mt-3">
                                         <div class="col-6">
-                                            <button type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1;">
-                                                <a href="admin/pageEditCar.php?id=<?=$cars['carId']?>">Edit Car</a>
-                                            </button>
+                                            <a type="button" class="btn btn-outline-dark" href="admin/pageEditCarMarket.php?id=<?=$cars['carId']?>&type=car">Edit Car</a>
                                         </div>
                                         <div class="col-6">
-                                            <button type="button" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1;">
-                                                <a href="#?id=<?=$cars['carId']?>">Delete Car</a>
-                                            </button>
+                                            <a type="button" class="btn btn-outline-dark" href="http://donkeycar.com/action/admin/actionDeleteCarMarketGarage.php?id=<?=$cars['carId']?>&type=car">Delete Car</a>
                                         </div>  
                                     </div>
                                 <?php endif;?>
@@ -66,5 +63,5 @@ include('../layout/header.php');
         </div>
     </section>
 </div>
-
+//https://wallsdesk.com/wp-content/uploads/2016/05/BMW-Logo-PNG.png
 <?php include('../layout/footer.php'); ?>

@@ -2,8 +2,15 @@
 require('../action/action.php');
 $pageTitle = "Edit Profil";
 include('../layout/header.php');
-$id = $_SESSION['userId'];
-if($_SESSION['role'] == 'admin'){
+if(empty($_GET['id']) || empty($_GET['role'])){
+    $id = $_SESSION['user']['id'];
+    $role = $_SESSION['user']['role'];
+}else{
+    $id = $_GET['id'];
+    $role = $_GET['role'];
+}
+
+if($role == 'admin'){
     $admin = getOneRow ('admins', 'adminId', $id);
     $markets = getMarket();
     $marketAdminName = null;
@@ -19,14 +26,14 @@ if($_SESSION['role'] == 'admin'){
             }
         }
     }
-}elseif($_SESSION['role'] == 'customer'){
+}elseif($role == 'customer'){
     $customer = getOneRow ('customers', 'customerId', $id);
 }
 ?>
-<?php if ($_SESSION['role'] == "customer"):?>
+<?php if ($role == "customer"):?>
     <div class="container mt-5">
         <?php printMessageresponse()?>
-        <form action="http://donkeycar.com/action/actionEditProfil.php?role=<?= $_SESSION['role']?>&id=<?=$id?>" method="POST">
+        <form action="http://donkeycar.com/action/actionEditProfil.php?role=<?= $_SESSION['user']['role']?>&id=<?=$id?>" method="POST">
             <div class="form-group">
                 <label for="customerFirstName">First Name:</label>
                 <input type="text" class="form-control" id="customerFirstName" name="customerFirstName" value="<?= $customer['customerFirstName']?>">
@@ -102,10 +109,10 @@ if($_SESSION['role'] == 'admin'){
             </div>
         </form>
     </div>
-<?php elseif ($_SESSION['role'] == "admin"):?>
+<?php elseif ($role == "admin"):?>
     <div class="container mt-5">
         <?php printMessageresponse()?>
-        <form action="http://donkeycar.com/action/actionEditProfil.php?role=<?= $_SESSION['role']?>&id=<?=$id?>" method="POST">
+        <form action="http://donkeycar.com/action/actionEditProfil.php?role=<?= $_SESSION['user']['role']?>&id=<?=$id?>" method="POST">
             <div class="form-group">
                 <label for="adminFirstName">First Name:</label>
                 <input type="text" class="form-control" id="adminFirstName" name="adminFirstName" value="<?= $admin['adminFirstName']?>">

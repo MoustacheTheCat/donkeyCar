@@ -1,8 +1,8 @@
 <?php
 require('../../action/action.php');
 if($_SERVER["REQUEST_METHOD"] === "POST"){
-    if(!empty($_SESSION['role']) && $_SESSION['role'] == "customer"){
-        $idCustomer = $_SESSION['userId'];
+    if(!empty($_SESSION['user']['role']) && $_SESSION['user']['role'] == "customer"){
+        $idCustomer = $_SESSION['user']['id'];
         $dataCustomers = getOneRow('customers', 'customerId', $idCustomer);
         $dataTotals = $_SESSION['tabTotal'];
         $nbDataRents = $_SESSION['nbDataRent'];
@@ -18,24 +18,23 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
             $marketId = getMarketId($dataRents['garageId']);
             $carId = $dataRents['carId'];
             if($dataRents['typeRental'] == 'daily'){
-                $qeuryAddLocation = "INSERT INTO donkeyCar.location (customerId, marketId, locationType ,locationDuration, locationDateStart, locationDateEnd, locationCostOfTVA, locationTotalHT, locationTotalTTC, locationCostCaution, locationStatus, locationResume) VALUES(:customerId, :marketId, :locationDuration,:locationType, :locationDateStart, :locationDateEnd, :locationCostOfTVA, :locationTotalHT, :locationTotalTTC, :locationCostCaution, :locationStatus, :locationResume)";
+                $qeuryAddLocation = "INSERT INTO donkeyCar.location (customerId, marketId, locationType ,locationDuration, locationDateStart, locationDateEnd, locationCostOfTVA, locationTotalHT, locationTotalTTC, locationCostCaution, locationStatus, locationResume) VALUES(:customerId, :marketId, :locationType, :locationDuration, :locationDateStart, :locationDateEnd, :locationCostOfTVA, :locationTotalHT, :locationTotalTTC, :locationCostCaution, :locationStatus, :locationResume)";
             }
             elseif($dataRents['typeRental'] == 'hourly'){
                 $qeuryAddLocation = "INSERT INTO donkeyCar.location (customerId, marketId, locationType, locationDuration, locationDate, locationHourStart, locationHourEnd, locationCostOfTVA, locationTotalHT, locationTotalTTC, locationCostCaution, locationStatus, locationResume) VALUES(:customerId, :marketId, :locationType, :locationDuration, :locationDate, :locationHourStart, :locationHourEnd, :locationCostOfTVA, :locationTotalHT, :locationTotalTTC, :locationCostCaution, :locationStatus, :locationResume)";
             }
-            
             $statementAddLocation = $pdo->prepare($qeuryAddLocation);
             $statementAddLocation->bindValue(':customerId', $idCustomer, PDO::PARAM_INT);
             $statementAddLocation->bindValue(':marketId', $marketId, PDO::PARAM_INT);
-            $statementAddLocation->bindValue(':locationType', $dataRents['typeRental'], PDO::PARAM_STR);
+            $statementAddLocation->bindValue(':locationType', $dataRents['typeRental']);
             if($dataRents['typeRental'] == 'daily'){
                 $statementAddLocation->bindValue(':locationDuration', $dataRents['nbDays'], PDO::PARAM_INT);
-                $statementAddLocation->bindValue(':locationDateStart', $dataRents['reservationDateStart'], PDO::PARAM_STR);
-                $statementAddLocation->bindValue(':locationDateEnd', $dataRents['reservationDateEnd'], PDO::PARAM_STR);
+                $statementAddLocation->bindValue(':locationDateStart', $dataRents['reservationDateStart']);
+                $statementAddLocation->bindValue(':locationDateEnd', $dataRents['reservationDateEnd']);
             }
             elseif($dataRents['typeRental'] == 'hourly'){
                 $statementAddLocation->bindValue(':locationDuration', $dataRents['nbHours'], PDO::PARAM_INT);
-                $statementAddLocation->bindValue(':locationDate', $dataRents['reservationDateStart'], PDO::PARAM_STR);
+                $statementAddLocation->bindValue(':locationDate', $dataRents['reservationDate'], PDO::PARAM_STR);
                 $statementAddLocation->bindValue(':locationHourStart', $dataRents['reservationHourStart'], PDO::PARAM_STR);
                 $statementAddLocation->bindValue(':locationHourEnd', $dataRents['reservationHourEnd'], PDO::PARAM_STR);
             }
@@ -71,7 +70,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
                 $to = $dataCustomers['customerEmail'];
                 $subject = "Ask Rental";
                 $message = "Hello ".$dataCustomers['customerFirstName']." ".$dataCustomers['customerLastName'];
-                $message .= "\n";
+                $message .= "\n\n";
                 $message .= "You have ask a rental for the car ".$dataRents['carModel'];
                 $message .= "\n";
                 $message .= "The rental start the ".$dataRents['reservationDateStart']." and end the ".$dataRents['reservationDateEnd'];
@@ -102,6 +101,24 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
                     unset($_SESSION['allDataRents']);
                     unset($_SESSION['nbDataRent']);
                     unset($_SESSION['tabTotal']);
+                    $pdo = connect_bd();
+                    $to2 = "admin@donkeycar.com";
+                    $subject2 = "New rental request";
+                    $message2 = "A new rental <a href='http://donkeycar.com/pages/pageDetailRental.php?id='".$idLocation."> location </a> has been made by a customer.\n\n Please check the list of rental requests.\n\n";
+                    $headers2 = "From: ".$_SESSION['user']['email'];
+                    $queryAM =  "INSERT INTO donkeyCar.messages (messageFrom, messageSubjet, messageTo, messageText) VALUES(:messageFrom, :messageSubjet, :messageTo, :messageText)";
+                    $statementAM = $pdo->prepare($queryAM);
+                    $statementAM->bindValue(':messageFrom', $_SESSION['user']['email'], PDO::PARAM_STR);
+                    $statementAM->bindValue(':messageSubjet', $subject2, PDO::PARAM_STR);
+                    $statementAM->bindValue(':messageTo', $to2, PDO::PARAM_STR);
+                    $statementAM->bindValue(':messageText', $message2, PDO::PARAM_STR);
+                    $statementAM->execute();
+                    $idmessage = $pdo->lastInsertId();
+                    $queryAM2 =  "INSERT INTO donkeyCar.messageCustomer (customerId, messageId) VALUES(:customerId, :messageId)";
+                    $statementAM2 = $pdo->prepare($queryAM2);
+                    $statementAM2->bindValue(':customerId', $idCustomer, PDO::PARAM_INT);
+                    $statementAM2->bindValue(':messageId', $idmessage, PDO::PARAM_INT);
+                    $statementAM2->execute();
                 $_SESSION['messageRental'] = "Your rental is pending, you will receive an email when it is validated";
                 header('Location: ../../index.php');
                 exit();

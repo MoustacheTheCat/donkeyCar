@@ -60,9 +60,6 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
                 $user['role'] = $role;
                 $user['roleType'] = $roleType;
                 $_SESSION['user'] = $user;
-                $_SESSION['role'] = $role;
-                $_SESSION['userId'] = $idLogin;
-                $_SESSION['roleType'] = $roleType;
                 $_SESSION['messageResponce'] =  "You are connected";
                 header('Location: ../index.php');
                 exit();

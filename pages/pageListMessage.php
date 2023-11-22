@@ -15,7 +15,6 @@ $messages = getAllData('messages');
             <thead>
                 <tr >
                     <th>Status</th>
-                    <th>ID</th>
                     <th>Message From</th>
                     <th>Message Subject</th>
                     <th>Message To</th>
@@ -28,13 +27,14 @@ $messages = getAllData('messages');
                 <?php foreach($messages as $message): ?>
                     <tr>
                         <td>
-                            <?php if($message['messageStatus'] == 0) : ?>
-                                <span class="badge bg-danger text-white rounded-pill cart-items">Not Open</span>
-                            <?php elseif($message['messageStatus'] == 1) : ?>
-                                <span class="badge bg-success text-white rounded-pill cart-items">Open</span>
-                            <?php endif; ?>
+                            <a href="http://donkeycar.com/pages/pageDetailMessage.php?id=<?= $message['messageId'] ?>">
+                                <?php if($message['messageStatus'] == 0) : ?>
+                                    <span class="badge bg-danger text-white rounded-pill cart-items">Not Open</span>
+                                <?php elseif($message['messageStatus'] == 1) : ?>
+                                    <span class="badge bg-success text-white rounded-pill cart-items">Open</span>
+                                <?php endif; ?>
+                            </a>
                         </td>
-                        <td><a href="http://donkeycar.com/pages/pageDetailMessage.php?id=<?= $message['messageId'] ?>"><?= $message['messageId'] ?></a></td>
                         <td><?= $message['messageFrom'] ?></td>
                         <td><?= $message['messageSubjet'] ?></td>
                         <td><?= $message['messageTo'] ?></td>

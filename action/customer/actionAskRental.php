@@ -45,6 +45,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
                 $datasRents['nbDays'] = verifDateValid($_POST['reservationDateStart'], $_POST['reservationDateEnd']);
             }
             else {
+                $_SESSION['messageError'] = "The end date must be greater than the start date";
                 header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step=daily');
                 exit();
             }

@@ -3,13 +3,14 @@ require('../../action/action.php');
 $pageTitle = 'List of all rental';
 include('../../layout/header.php');
 $id = $_SESSION['user']['id'];
+print_r($id);
 $dataRents = getValidRent($id);
 
 ?>
 
 <div class="container mt-5">
-    <table class="table table-responsive table-striped">
-        <thead>
+    <table class="table table-bordered table-striped align-middle text-center">
+        <thead class="table-dark">
             <tr>
                 <th>Location ID</th>
                 <th>Customer Name</th>
@@ -27,10 +28,10 @@ $dataRents = getValidRent($id);
                 <th>Total TTC</th>
                 <th>Caution Cost</th>
                 <th>Status</th>
-                <th>Summary</th>
+                <th>Valide</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
             <?php foreach ($dataRents as $dataRent) :?>
                 <tr>
                     <td><a href="http://donkeycar.com/pages/pageDetailRental.php?id=<?= $dataRent['locationId'] ?>"><?= $dataRent['locationId'] ?></a></td>
@@ -64,8 +65,20 @@ $dataRents = getValidRent($id);
                     <td><?= $dataRent['locationTotalHT'] ?></td>
                     <td><?= $dataRent['locationTotalTTC'] ?></td>
                     <td><?= $dataRent['locationCostCaution'] ?></td>
-                    <td><?= $dataRent['locationStatus'] ?></td>
-                    <td><?= $dataRent['locationResume'] ?></td>
+                    <?php if($dataRent['locationStatus'] == 0):?>
+                        <td><span class="badge bg-success text-white rounded-pill cart-items">&#x2713</span></td>
+                        <td></td>
+                    <?php elseif($dataRent['locationStatus'] == 1):?>
+                        <td><span class="badge bg-warning text-white rounded-pill cart-items">?</span></td>
+                            <td>
+                                <a href="../../action/admin/actionConfirmRental.php?type=yes&id=<?=$dataRent['locationId']?>">&#x2705 </a>
+                                <a href="../../action/admin/actionConfirmRental.php?type=no&id=<?=$dataRent['locationId']?>"> &#x274C</a>
+                            </td>
+                    <?php elseif($dataRent['locationStatus'] == 2):?>
+                        <td><span class="badge bg-danger text-white rounded-pill cart-items">&#x2717</span></td>
+                        <td></td>
+                    <?php endif;?>
+                    
                 </tr>
             <?php endforeach;?>
         </tbody>

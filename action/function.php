@@ -258,7 +258,7 @@ function getOneRow ($table, $col, $id) :array {
 
 function getOneRowCarWithTypeAndBrand($id) : array {
     $pdo = connect_bd();
-    $query = $pdo->prepare('SELECT cars.*,typeCar.typeCarName, brands.brandName FROM cars INNER JOIN typeCar ON cars.typeCarId = typeCar.typeCarId INNER JOIN brands ON cars.brandId = brands.brandId WHERE cars.carId = :id');
+    $query = $pdo->prepare('SELECT cars.*,typeCar.typeCarName, brands.brandName, g.garageName, g.garageId FROM cars  JOIN typeCar ON cars.typeCarId = typeCar.typeCarId  JOIN brands ON cars.brandId = brands.brandId JOIN garageCar gc ON gc.carId = cars.carId JOIN garages g ON gc.garageId = g.garageId WHERE cars.carId = :id');
     $query->bindValue(':id', $id, PDO::PARAM_INT);
     $query->execute();
     $cars = $query->fetch(PDO::FETCH_ASSOC);
@@ -302,6 +302,16 @@ function getValidRent($id){
     $datas = $query->fetchAll(PDO::FETCH_ASSOC);
     return $datas;
 }
+
+function validOneRent($id){
+    $pdo = connect_bd();
+    $query = $pdo->prepare( "SELECT l.*,c.carId FROM locationValidationAdmin lva JOIN locationValidation lv ON lv.locationValidationId = lva.locationValidationId JOIN location l ON l.locationId = lv.locationId JOIN carLocation cl ON cl.locationId = l.locationId JOIN cars c ON c.carId = cl.carId  WHERE l.locationId = :id");
+    $query->bindValue(':id', $id, PDO::PARAM_INT);
+    $query->execute();
+    $datas = $query->fetch(PDO::FETCH_ASSOC);
+    return $datas;
+}
+
 
 function getRent($id){
     $pdo = connect_bd();
@@ -473,6 +483,24 @@ function verifTypeBrand($data, $type){
         }
     }
     return true;
+}
+
+function addType($data){
+    $pdo = connect_bd();
+    $query = $pdo->prepare('INSERT INTO typeCar (typeCarName) VALUES (:typeCarName)');
+    $query->bindValue(':typeCarName', $data);
+    $query->execute();
+    $typeId = $pdo->lastInsertId();
+    return $typeId;
+}
+
+function addBrand($data){
+    $pdo = connect_bd();
+    $query = $pdo->prepare('INSERT INTO brands (brandName) VALUES (:brandName)');
+    $query->bindValue(':brandName', $data);
+    $query->execute();
+    $brandId = $pdo->lastInsertId();
+    return $brandId;
 }
 
 function verifImat($data){

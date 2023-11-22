@@ -60,7 +60,9 @@
                             <?php if(!empty($_SESSION['user']['role']) && ($_SESSION['user']['role'] == 'admin' ||$_SESSION['user']['role'] == 'customer')):?>
                                 <li class="nav-item dropdown mr-5 pr-5">
                                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMarket" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Profil
+                                        Profil<?php if(countMessageNoRead() != 0):?>
+                                            <span class="badge bg-dark text-white rounded-pill cart-items"><?= countMessageNoRead()?></span>
+                                        <?php endif;?>
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMarket">
                                         <li><a class="dropdown-item" href="http://donkeycar.com/pages/pageListMessage.php">
