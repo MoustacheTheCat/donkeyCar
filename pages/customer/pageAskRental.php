@@ -70,8 +70,8 @@ unset($_SESSION['cardatas']);
         <?php elseif($_GET['step'] == "hourly"):?>
             <form action="../../action/customer/actionAskRental.php?id=<?= $_GET['id'];?>&step=hourly" method="POST">
                 <div class="form-group">
-                    <label for="reservationDateStart">Reservation Date:</label>
-                    <input type="date" class="form-control" id="reservationDate" name="reservationDateStart"  min="<?php echo date('Y-m-d');?>" value="<?php echo date('Y-m-d');?>">
+                    <label for="reservationDate">Reservation Date:</label>
+                    <input type="date" class="form-control" id="reservationDate" name="reservationDate"  min="<?php echo date('Y-m-d');?>" value="<?php echo date('Y-m-d');?>">
                 </div>
                 <div class="form-group">
                     <label for="reservationHourStart">Hourly Start:</label>

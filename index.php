@@ -21,16 +21,16 @@ if(!empty($_SESSION['cars'])){
 ?>
 <style><?php include('css/style.css')?></style>
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-12 mt-5">
         <h2 class="text-center">Choose your destination</h2>
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-12  mt-5">
         <p class="text-center">Filter your destination by a city or a country</p>
     </div>
 </div>
-<div class="row text-center justify-content-center">
+<div class="row text-center justify-content-center  m-5">
     <?php filterCityCountry();?>
 </div>
 
@@ -46,7 +46,7 @@ if(!empty($_SESSION['cars'])){
             <p class="text-center">Filter car by year or type</p>
         </div>
     </div>
-    <div class="row text-center justify-content-center">
+    <div class="row text-center justify-content-center m-5">
         <?php filterTypeYear();?>
     </div>
         

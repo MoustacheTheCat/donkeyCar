@@ -376,14 +376,44 @@ function countMessageNoRead(){
 }
 
 
+
+
+function getCarGarageMarketNameWhereId($id){
+    $pdo = connect_bd();
+    $stmt = $pdo->prepare('SELECT c.carName,c.carId, b.brandName, g.garageName, m.marketId, m.marketName FROM garageCar gc JOIN garages g ON gc.garageId = g.garageId JOIN cars c ON gc.carId = c.carId JOIN  markets m ON g.marketId = m.marketId JOIN brands b ON b.brandId = c.brandId WHERE g.garageId = :id');
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    $datas = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $datas;
+    
+}
+
+function selectAllCarInGarage($id){
+    $pdo = connect_bd();
+    $stmt = $pdo->prepare('SELECT  c.*, b.brandName ,t.typeCarName FROM garageCar gc JOIN garages g ON gc.garageId = g.garageId JOIN cars c ON gc.carId = c.carId JOIN  markets m ON g.marketId = m.marketId JOIN brands b ON b.brandId = c.brandId JOIN typeCar t ON t.typeCarId = c.typeCarId WHERE g.garageId = :id');
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    $datas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $datas;
+}
+
+function selectAllCarInGarageByGId($id){
+    $pdo = connect_bd();
+    $stmt = $pdo->prepare('SELECT c.*, b.brandName ,t.typeCarName FROM garageCar gc JOIN garages g ON gc.garageId = g.garageId JOIN cars c ON gc.carId = c.carId JOIN  markets m ON g.marketId = m.marketId JOIN brands b ON b.brandId = c.brandId JOIN typeCar t ON t.typeCarId = c.typeCarId WHERE m.marketId = :id');
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    $datas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $datas;
+}
+
 // function print (index.php)
 
 
 function printTableHome($city, $cars){
     echo ('
-    <div class="row mt-4">
+    <div class="row mt-4 mb-4">
         <div class="col">
-            <table class="table">
+            <table class="table m-5 b-5">
                 <thead>
                     <tr>
                         <th>Brand</th>
@@ -542,9 +572,20 @@ function printMessageresponse(){
         }
         
         echo ('
-        <div class="row justify-content-center mt-3">
+        <div class="row justify-content-center m-3 p-3">
             <div class="col-md-2">
-                <div class="alert alert-success" role="alert">
+                <div class="alert alert-success" role="alert" m-3 p-3>
+                    <p class="text-center">'.$message.'</p>
+                </div>
+            </div>
+        </div>');
+    }elseif(!empty($_SESSION['messageError'])){
+        $message = $_SESSION['messageError'];
+        unset($_SESSION['messageError']);
+        echo ('
+        <div class="row justify-content-center m-3 p-3">
+            <div class="col-md-2">
+                <div class="alert alert-danger" role="alert" m-3 p-3>
                     <p class="text-center">'.$message.'</p>
                 </div>
             </div>
@@ -590,9 +631,10 @@ function selectCountry(){
 }
 
 function printBasket($datas, $nbs){
+
     $typeRents = array();
     echo ('
-    <div class="row mt-4">
+    <div class="row mt-4 p-4 container-fluid ">
         <div class="col">
             <table class="table">
                 <thead>
@@ -644,6 +686,8 @@ function printBasket($datas, $nbs){
                             <th>TOTAL price HT</th>
                             <th>TOTAL price TTC</th>
                             <th>Caution price</th>
+                            <th>EDIT</th>
+                            <th>DELETE</th>
                             
                     </tr>
                 </thead>
@@ -654,17 +698,18 @@ function printBasket($datas, $nbs){
                     echo ('
                     <tr>
                         <td>'.$data['carModel'].'</td>
-                        <td>'.$data['reservationDateStart'].'</td>
-                        <td>'.$data['reservationDateEnd'].'</td>
                     ');
                     if($data['typeRental'] == "hourly"){
+                        echo '<td>'.$data['reservationDate'].'</td>';
                         echo '<td>'.$data['nbHours'].'</td>';
                         echo '<td>'.$data['carTarifHourHT'].'</td>';
                         echo '<td>'.$data['carTarifHourHT']*1.2.'</td>';
                         echo '<td>'.$data['carTarifHourHT']* $data['nbHours'].'</td>';
                         echo '<td>'.($data['carTarifHourHT']* $data['nbHours']) *1.2.'</td>';                  
                     }
-                    elseif($data['typeRental'] == "daily") {                   
+                    elseif($data['typeRental'] == "daily") {    
+                        echo '<td>'.$data['reservationDateStart'].'</td>';
+                        echo '<td>'.$data['reservationDateEnd'].'</td>';               
                         echo '<td>'.$data['nbDays'].'</td>';
                         echo '<td>'.$data['carTarifDayHT'].'</td>';
                         echo '<td>'.$data['carTarifDayHT']*1.2.'</td>';
@@ -673,12 +718,17 @@ function printBasket($datas, $nbs){
                     }
                     echo ('
                         <td>'.$data['carCaution'].'</td>
-                    </tr>
+                        ');
+                    }
+                        foreach($datas as $key => $data){
+                            echo('<td><a href="http://donkeycar.com/pages/customer/pageEditBasket.php?id='.$key.'">EDIT</a></td>
+                            <td><a href="http://donkeycar.com/action/customer/actionDeleteBasket.php?id='.$key.'">DELETE</a></td>
+                        </tr>
                     ');
                 }
             }
             else {
-                foreach($datas as $data){
+                foreach($datas as $key => $data){
                     if($data['typeRental'] == "daily") {
                         echo ('
                         <tr>
@@ -694,6 +744,8 @@ function printBasket($datas, $nbs){
                             <td>'.$data['carTarifDayHT']* $data['nbDays'].'</td>
                             <td>'.($data['carTarifDayHT']* $data['nbDays']) *1.2.'</td>
                             <td>'.$data['carCaution'].'</td>
+                            <td><a href="http://donkeycar.com/pages/customer/pageEditBasket.php?id='.$key.'">EDIT</a></td>
+                            <td><a href="http://donkeycar.com/action/customer/actionDeleteBasket.php?id='.$key.'">DELETE</a></td>
                         </tr>
                         ');
                     }
@@ -701,8 +753,8 @@ function printBasket($datas, $nbs){
                         echo ('
                         <tr>
                             <td>'.$data['carModel'].'</td>
-                            <td>'.$data['reservationDateStart'].'</td>
-                            <td>'.$data['reservationDateEnd'].'</td>
+                            <td>'.$data['reservationDate'].'</td>
+                            <td></td>
                             <td>'.$data['nbHours'].'</td>
                             <td>'.$data['carTarifHourHT'].'</td>
                             <td>'.$data['carTarifHourHT']*1.2.'</td>
@@ -712,6 +764,8 @@ function printBasket($datas, $nbs){
                             <td>'.$data['carTarifHourHT']* $data['nbHours'].'</td>
                             <td>'.($data['carTarifHourHT']* $data['nbHours']) *1.2.'</td>
                             <td>'.$data['carCaution'].'</td>
+                            <td><a href="http://donkeycar.com/pages/customer/pageEditBasket.php?id='.$key.'">EDIT</a></td>
+                            <td><a href="http://donkeycar.com/action/customer/actionDeleteBasket.php?id='.$key.'">DELETE</a></td>
                         </tr>
                         ');
                     }
@@ -744,27 +798,29 @@ function printBasket($datas, $nbs){
             
     echo ('
                 </tbody>
-                <tfoot>
+            </table>
+        </div>
+    </div>
+    <div class="row mt-4 p-4 container-fluid justify-content-center">
+        <div class="col-8">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td colspan="11">TOTAL HT</td>');
+                        <th>TOTAL HT</th>
+                        <th>TOTAL TTC</th>
+                        <th>TOTAL CAUTION</th>
+                        <th>TOTAL TTC + CAUTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>');
                         echo "<td>".$totalHT."</td>";
-                echo ('
-                    </tr>
-                    <tr>
-                        <td colspan="11">TOTAL TTC</td>');
                         echo "<td>".$totalTTC."</td>";
-                echo ('
-                    </tr>
-                    <tr>
-                        <td colspan="11">TOTAL CAUTION</td>');
                         echo "<td>".$totalCaution."</td>";
-                echo ('
-                    </tr>
-                    <tr>
-                        <td colspan="11">TOTAL TTC + CAUTION</td>');
                         echo "<td>".$total."</td>";
                 echo ('
                     </tr>
+                </tbody>
             </table>
         </div>
     </div>
@@ -778,7 +834,7 @@ function printBasket($datas, $nbs){
     echo ('
     <div class="col-md-12">
             <form action="http://donkeycar.com/action/customer/actionSendRent.php" method="POST"> 
-                <div class="row justify-content-center mt-3">
+                <div class="row justify-content-center mt-3 mb-5">
                     <div class="col-md-2">
                         <input type="submit" class="btn btn-primary btn-block" value="Valide my basket" name="sendAskRent">
                     </div>
@@ -801,6 +857,73 @@ function deletUser($id, $query){
         header('Location: ../index.php');
         $_SESSION['messageResponce'] = 'Your profil has been deleted';
         exit();
+    }
+}
+
+
+//function verif date is valid 
+
+function verifDateValid ($start, $end){
+    $yearStart = substr($start, 0, 4);
+    $yearEnd = substr($end, 0, 4);
+    $monthStart = substr($start, 5, 2);
+    $monthEnd = substr($end, 5, 2);
+    $dayStart = substr($start, 8, 2);
+    $dayEnd = substr($end, 8, 2);
+    $nbDays = null;
+    if($yearStart > $yearEnd){
+        $_SESSION['messageError'] = "The end date must be greater than the start date";
+    }
+    elseif($yearStart == $yearEnd && $monthStart > $monthEnd){
+        $_SESSION['messageError'] = "The end date must be greater than the start date";
+    }
+    elseif($yearStart == $yearEnd && $monthStart == $monthEnd && $dayStart > $dayEnd){
+        $_SESSION['messageError'] = "The end date must be greater than the start date";
+    }
+    elseif($yearStart == $yearEnd && $monthStart == $monthEnd && $dayStart == $dayEnd){
+        $_SESSION['messageError'] = "The end date must be greater than the start date";
+    }
+    elseif($yearStart == $yearEnd && $monthStart == $monthEnd && $dayStart < $dayEnd){
+        $days = $dayEnd - $dayStart;
+        $nbDays = $days;
+    }
+    elseif($yearStart == $yearEnd && $monthStart < $monthEnd && $dayStart < $dayEnd){
+        $daysInMounth = null;
+        if($monthStart == 1 || $monthStart == 3 || $monthStart == 5 || $monthStart == 7 || $monthStart == 8 || $monthStart == 10 || $monthStart == 12){
+            $daysInMounth = 31;
+        }
+        elseif($monthStart == 4 || $monthStart == 6 || $monthStart == 9 || $monthStart == 11){
+            $daysInMounth = 30 ;
+        }
+        elseif($monthStart == 2){
+            $daysInMounth = 28 ;
+        }
+        $months = $monthEnd - $monthStart;
+        $days = $dayEnd - $dayStart;
+        $nbDays = $days + ($months * $daysInMounth);
+    }
+    elseif($yearStart < $yearEnd && $monthStart < $monthEnd && $dayStart < $dayEnd){
+        $daysInMounth = null;
+        if($monthStart == 1 || $monthStart == 3 || $monthStart == 5 || $monthStart == 7 || $monthStart == 8 || $monthStart == 10 || $monthStart == 12){
+            $daysInMounth = 31;
+        }
+        elseif($monthStart == 4 || $monthStart == 6 || $monthStart == 9 || $monthStart == 11){
+            $daysInMounth = 30 ;
+        }
+        elseif($monthStart == 2){
+            $daysInMounth = 28 ;
+        }
+        $years = $yearEnd - $yearStart;
+        $months = $monthEnd - $monthStart ;
+        $days =  $dayStart + $dayEnd;
+        $nbDays = $days + ($months * $daysInMounth) + ($years * 365);
+    }
+
+    if($nbDays != null){
+        return $nbDays;
+    }
+    else {
+        return false;
     }
 }
 

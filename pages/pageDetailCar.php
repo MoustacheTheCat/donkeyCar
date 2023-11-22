@@ -21,7 +21,7 @@ include('../layout/header.php');
                         </div>
                         <div class="p-4 text-black" style="background-color: #f8f9fa;">
                             <div class="d-flex justify-content-end text-center py-1">
-                                <?php if($cars['garargeCarDisponibility'] == 0 && !empty($_SESSION['role']) && $_SESSION['role'] == 'customer'):?>
+                                <?php if(($cars['garargeCarDisponibility'] == 0 && !empty($_SESSION['role']) && $_SESSION['role'] == 'customer')|| ($cars['garargeCarDisponibility'] == 0 && empty($_SESSION['role']))):?>
                                     <div>
                                         <form action="customer/pageAskRental.php?id=<?= $cars['carId'];?>" method="POST" class="list-group list-group-flush">
                                             <input type="submit" value="Rental" name="rentalCar" class="btn btn-outline-dark" data-mdb-ripple-color="dark" style="z-index: 1;">

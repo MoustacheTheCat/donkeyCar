@@ -3,7 +3,7 @@ require('../action/action.php');
 $pageTitle = 'Contact Donkey Car';
 include('../layout/header.php');
 ?>
-<div class="container-fluid">
+<div class="container-fluid cont">
     <form action="../action/actionSendMessage.php" method="POST">
         <div class="row mb-4">
             <div class="col">

@@ -15,16 +15,15 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
             $step = "hourly";
         }
         else {
-            $_SESSION['messageRental'] = "You have not chosen a rental type";
+            $_SESSION['messageError'] = "You have not chosen a rental type";
             $step = "type";
         }
         header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step='.$step);
     }
     elseif(isset($_POST['validerentalDate'])){
         $datasRents = $_SESSION['dataRents'];
-        $datasRents['reservationDateStart'] = $_POST['reservationDateStart'];
         if($_GET['step'] == "hourly"){
-            $datasRents['reservationDateEnd'] = $_POST['reservationDateStart'];
+            $datasRents['reservationDate'] = $_POST['reservationDate'];
             $datasRents['carTarifHourHT'] = $_POST['carTarifHourHT'];
             $datasRents['reservationHourStart'] = $_POST['reservationHourStart'];
             $datasRents['reservationHourEnd'] = $_POST['reservationHourEnd'];
@@ -32,78 +31,24 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
             $hourEnd = intval(substr($_POST['reservationHourEnd'], 0, 2));
             $nbHours = $hourEnd - $hourStart;
             if($nbHours < 0){
-                $_SESSION['messageRental'] = "The end time must be greater than the start time";
+                $_SESSION['messageError'] = "The end time must be greater than the start time";
                 header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step=hourly');
                 exit();
             }
             $datasRents['nbHours'] = $nbHours;
 
         }else {
+            $datasRents['reservationDateStart'] = $_POST['reservationDateStart'];
             $datasRents['reservationDateEnd'] = $_POST['reservationDateEnd'];
             $datasRents['carTarifDayHT'] = $_POST['carTarifDayHT'];
-            $yearStart = substr($_POST['reservationDateStart'], 0, 4);
-            $yearEnd = substr($_POST['reservationDateEnd'], 0, 4);
-            $monthStart = substr($_POST['reservationDateStart'], 5, 2);
-            $monthEnd = substr($_POST['reservationDateEnd'], 5, 2);
-            $dayStart = substr($_POST['reservationDateStart'], 8, 2);
-            $dayEnd = substr($_POST['reservationDateEnd'], 8, 2);
-            $nbDays = null;
-            if($yearStart > $yearEnd){
-                $_SESSION['messageRental'] = "The end date must be greater than the start date";
+            if(verifDateValid ($_POST['reservationDateStart'], $_POST['reservationDateEnd']) != false){
+                $datasRents['nbDays'] = verifDateValid($_POST['reservationDateStart'], $_POST['reservationDateEnd']);
+            }
+            else {
                 header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step=daily');
                 exit();
             }
-            elseif($yearStart == $yearEnd && $monthStart > $monthEnd){
-                $_SESSION['messageRental'] = "The end date must be greater than the start date";
-                header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step=daily');
-                exit();
-            }
-            elseif($yearStart == $yearEnd && $monthStart == $monthEnd && $dayStart > $dayEnd){
-                $_SESSION['messageRental'] = "The end date must be greater than the start date";
-                header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step=daily');
-                exit();
-            }
-            elseif($yearStart == $yearEnd && $monthStart == $monthEnd && $dayStart == $dayEnd){
-                $_SESSION['messageRental'] = "The end date must be greater than the start date";
-                header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step=daily');
-                exit();
-            }
-            elseif($yearStart == $yearEnd && $monthStart == $monthEnd && $dayStart < $dayEnd){
-                $days = $dayEnd - $dayStart;
-                $nbDays = $days;
-            }
-            elseif($yearStart == $yearEnd && $monthStart < $monthEnd && $dayStart < $dayEnd){
-                $daysInMounth = null;
-                if($monthStart == 1 || $monthStart == 3 || $monthStart == 5 || $monthStart == 7 || $monthStart == 8 || $monthStart == 10 || $monthStart == 12){
-                    $daysInMounth = 31;
-                }
-                elseif($monthStart == 4 || $monthStart == 6 || $monthStart == 9 || $monthStart == 11){
-                    $daysInMounth = 30 ;
-                }
-                elseif($monthStart == 2){
-                    $daysInMounth = 28 ;
-                }
-                $months = $monthEnd - $monthStart;
-                $days = $dayEnd - $dayStart;
-                $nbDays = $days + ($months * $daysInMounth);
-            }
-            elseif($yearStart < $yearEnd && $monthStart < $monthEnd && $dayStart < $dayEnd){
-                $daysInMounth = null;
-                if($monthStart == 1 || $monthStart == 3 || $monthStart == 5 || $monthStart == 7 || $monthStart == 8 || $monthStart == 10 || $monthStart == 12){
-                    $daysInMounth = 31;
-                }
-                elseif($monthStart == 4 || $monthStart == 6 || $monthStart == 9 || $monthStart == 11){
-                    $daysInMounth = 30 ;
-                }
-                elseif($monthStart == 2){
-                    $daysInMounth = 28 ;
-                }
-                $years = $yearEnd - $yearStart;
-                $months = $monthEnd - $monthStart ;
-                $days =  $dayStart + $dayEnd;
-                $nbDays = $days + ($months * $daysInMounth) + ($years * 365);
-            }
-            $datasRents['nbDays'] = $nbDays;
+            
         }
         unset($_SESSION['dataRents']);
         $saveDatasRents = $_SESSION['allDataRents'];
@@ -114,7 +59,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
         header('Location: ../../index.php');    
     }
 }else {
-    $_SESSION['messageResponce'] =  "Method not allowed";
+    $_SESSION['messageError'] =  "Method not allowed";
     header('Location: ../404.php');
 }
 

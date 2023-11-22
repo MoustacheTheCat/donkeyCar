@@ -9,7 +9,6 @@ $datasRents = null;
 if(!empty($_SESSION['nbDataRent'])){
     $nbRents = $_SESSION['nbDataRent'];
     $datasRents = $_SESSION['allDataRents'];
-    print_r($datasRents);
     $_SESSION['messageRental'] = "here is your basket";
 }
 else {
@@ -17,6 +16,7 @@ else {
 }
 
 ?>
+<style><?php include('../css/layout.css')?></style>
 <?php printMessageresponse(); 
     if(!empty($datasRents)){
         printBasket($datasRents, $nbRents); 
