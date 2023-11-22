@@ -5,7 +5,7 @@ include('layout/header.php');
 ?>
 <div class="row">
     <div class="col-md-12">
-        <h2 class="text-center"><?= $_SESSION['messageResponce']?></h2>
+        <?= printMessageresponse()?>
     </div>
 </div>
 <?php include('layout/footer.php'); ?>

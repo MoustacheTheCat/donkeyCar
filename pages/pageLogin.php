@@ -5,8 +5,9 @@ include('../layout/header.php');
 ?>
 <style><?php include('../css/layout.css');?></style>
 <div class="container-fluid cont">
+<?php printMessageresponse()?>
     <section class="gradient-custom">
-        <div class="container py-5 h-100">
+        <div class="container py-5 ">
             <div class="row d-flex justify-content-center align-items-center h-100">
                 <div class="col-12 col-md-8 col-lg-6 col-xl-5">
                     <div class="card bg-dark text-white" style="border-radius: 1rem;">
@@ -14,7 +15,6 @@ include('../layout/header.php');
                             <div class="mb-md-5 mt-md-4 pb-5">
                                 <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
                                 <p class="text-white-50 mb-5">Please enter your login and password!</p>
-                                <?php printMessageresponse()?>
                                 <form action="http://donkeycar.com/action/actionLogin.php" method="POST">
                                     <div class="form-outline form-white mb-4">
                                         <label for="email" class="form-label">Email:</label>
