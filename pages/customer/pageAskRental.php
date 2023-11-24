@@ -3,6 +3,7 @@ require('../../action/action.php');
 $cars = getOnCarInGarageByCarId($_GET['id']);
 $pageTitle = "Rental the ".$cars['brandName']." ".$cars['carName'];
 include('../../layout/header.php');
+
 unset($_SESSION['cardatas']);
 ?> 
 <div class="container mt-5">

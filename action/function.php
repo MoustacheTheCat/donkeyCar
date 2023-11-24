@@ -513,6 +513,44 @@ function verifImat($data){
     return true;
 }
 
+function getCarDispo($id){
+    $pdo = connect_bd();
+    $query = $pdo->prepare('SELECT l.locationDate, l.locationDateEnd, l.locationHourStart, l.locationDateStart, l.locationHourEnd FROM carLocation cl JOIN location l ON l.locationId = cl.locationId  JOIN cars c ON c.carId = cl.carId WHERE c.carId = :id');
+    $query->bindValue(':id', $id, PDO::PARAM_INT);
+    $query->execute();
+    $car = $query->fetch(PDO::FETCH_ASSOC);
+    return $car;
+}
+
+function verifIsDaily($start, $end, $id){
+    $car = getCarDispo($id);
+    if(!empty($car)){
+        if($start != $car['locationDateStart'] && $end != $car['locationDateEnd'] && $end != $car['locationDateStart'] && $start != $car['locationDateEnd']){
+            return true;
+        }
+    }elseif (empty($car)) {
+        return true;
+    }
+    return false;
+    
+}
+
+function verifIsHourly($date, $start, $end, $id){
+    $car = getCarDispo($id);
+    if(!empty($car)){
+        if($date != $car['locationDate']){
+            return true;
+            
+        }elseif ($start != $car['locationHourStart'] && $start != $car['locationHourEnd'] && $end != $car['locationHourStart'] && $end != $car['locationHourEnd']) {
+            return true;
+        }
+    }
+    elseif (empty($car)) {
+        return true;
+    }
+    return false;
+}
+
 // function print filter 
 
 function filterCityCountry(){
@@ -658,220 +696,120 @@ function selectCountry(){
     }
 }
 
+function printColumnHeaders($typeRental) {
+    if ($typeRental == "hourly") {
+        echo '<th>Number Hour</th><th>Price Hour HT</th><th>Price Hour TTC</th>';
+    } elseif ($typeRental == "daily") {
+        echo '><th>Date End</th><th>Number Day</th><th>Price Day HT</th><th>Price Day TTC</th>';
+    }
+}
+
+function printRentalData($data,$key, $typeRental) {
+    $html = function($text) { return htmlspecialchars($text, ENT_QUOTES, 'UTF-8'); };
+
+    if ($typeRental == "hourly") {
+        echo '<td>'.$html($data['reservationDate']).'</td>';
+        echo '<td>'.$html($data['nbHours']).'</td>';
+        echo '<td>'.$html($data['carTarifHourHT']).'</td>';
+        echo '<td>'.$html($data['carTarifHourHT']*1.2).'</td>';
+        echo '<td>'.$html($data['carTarifHourHT']* $data['nbHours']).'</td>';
+        echo '<td>'.($html($data['carTarifHourHT']* $data['nbHours']) *1.2).'</td>';
+    } elseif ($typeRental == "daily") {
+        echo '<td>'.$html($data['reservationDateStart']).'</td>';
+        echo '<td>'.$html($data['reservationDateEnd']).'</td>';               
+        echo '<td>'.$html($data['nbDays']).'</td>';
+        echo '<td>'.$html($data['carTarifDayHT']).'</td>';
+        echo '<td>'.$html($data['carTarifDayHT']*1.2).'</td>';
+        echo '<td>'.$html($data['carTarifDayHT']* $data['nbDays']).'</td>';
+        echo '<td>'.($html($data['carTarifDayHT']* $data['nbDays']) *1.2).'</td>';
+    }
+    // Affichage des données communes
+    echo '<td>'.$html($data['carCaution']).'</td>';
+    echo '<td><a href="http://donkeycar.com/pages/customer/pageEditBasket.php?id='.urlencode($key).'">EDIT</a></td>';
+    echo '<td><a href="http://donkeycar.com/action/customer/actionDeleteBasket.php?id='.urlencode($key).'">DELETE</a></td>';
+}
+
 function printBasket($datas, $nbs){
 
-    $typeRents = array();
-    echo ('
-    <div class="row mt-4 p-4 container-fluid ">
-        <div class="col">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th>Date Start</th>
-                        <th>Date End</th>
-                        ');
-                        if($nbs == 1){
-                            if($datas[0]['typeRental'] == "hourly"){
-                                echo '<th>Number Hour</th>';
-                                echo '<th>Price Hour HT</th>';
-                                echo '<th>Price Hour TTC</th>';
-                            }
-                            elseif($datas[0]['typeRental'] == "daily") {
-                                echo '<th>Number Day</th>';
-                                echo '<th>Price Day HT</th>';
-                                echo '<th>Price Day TTC</th>';
-                            }
-                        }elseif ($nbs != 1){
-                            foreach($datas as $data){
-                                if(!array_search($data['typeRental'], $typeRents , true)){
-                                    $typeRents[] = $data['typeRental'];
-                                }
-                            }
-                        
-                            if(count($typeRents)==1){
-                                if($typeRents[0] == "hourly"){
-                                    echo '<th>Number Hour</th>';
-                                    echo '<th>Price Hour HT</th>';
-                                    echo '<th>Price Hour TTC</th>';
-                                }
-                                elseif($typeRents[0] == "daily") {
-                                    echo '<th>Number Day</th>';
-                                    echo '<th>Price Day HT</th>';
-                                    echo '<th>Price Day TTC</th>';
-                                }
-                            }
-                            else {
-                                echo '<th>Number Hour</th>';
-                                echo '<th>Price Hour HT</th>';
-                                echo '<th>Price Hour TTC</th>';
-                                echo '<th>Number Day</th>';
-                                echo '<th>Price Day HT</th>';
-                                echo '<th>Price Day TTC</th>';
-                            }
-                        }
-                        echo ('
-                            <th>TOTAL price HT</th>
-                            <th>TOTAL price TTC</th>
-                            <th>Caution price</th>
-                            <th>EDIT</th>
-                            <th>DELETE</th>
-                            
-                    </tr>
-                </thead>
-                <tbody>
-    ');
-            if($nbs == 1){
-                foreach($datas as $data){
-                    echo ('
-                    <tr>
-                        <td>'.$data['carModel'].'</td>
-                    ');
-                    if($data['typeRental'] == "hourly"){
-                        echo '<td>'.$data['reservationDate'].'</td>';
-                        echo '<td>'.$data['nbHours'].'</td>';
-                        echo '<td>'.$data['carTarifHourHT'].'</td>';
-                        echo '<td>'.$data['carTarifHourHT']*1.2.'</td>';
-                        echo '<td>'.$data['carTarifHourHT']* $data['nbHours'].'</td>';
-                        echo '<td>'.($data['carTarifHourHT']* $data['nbHours']) *1.2.'</td>';                  
-                    }
-                    elseif($data['typeRental'] == "daily") {    
-                        echo '<td>'.$data['reservationDateStart'].'</td>';
-                        echo '<td>'.$data['reservationDateEnd'].'</td>';               
-                        echo '<td>'.$data['nbDays'].'</td>';
-                        echo '<td>'.$data['carTarifDayHT'].'</td>';
-                        echo '<td>'.$data['carTarifDayHT']*1.2.'</td>';
-                        echo '<td>'.$data['carTarifDayHT']* $data['nbDays'].'</td>';
-                        echo '<td>'.($data['carTarifDayHT']* $data['nbDays']) *1.2.'</td>';
-                    }
-                    echo ('
-                        <td>'.$data['carCaution'].'</td>
-                        ');
-                    }
-                        foreach($datas as $key => $data){
-                            echo('<td><a href="http://donkeycar.com/pages/customer/pageEditBasket.php?id='.$key.'">EDIT</a></td>
-                            <td><a href="http://donkeycar.com/action/customer/actionDeleteBasket.php?id='.$key.'">DELETE</a></td>
-                        </tr>
-                    ');
-                }
-            }
-            else {
-                foreach($datas as $key => $data){
-                    if($data['typeRental'] == "daily") {
-                        echo ('
+    if (!isset($_SESSION)) session_start(); // Démarre la session si ce n'est pas déjà fait
+
+    $typeRents = array_unique(array_column($datas, 'typeRental'));
+
+    echo '<div class="row mt-4 p-4 container-fluid "><div class="col"><table class="table">';
+
+    // Affichage des en-têtes
+    echo '<thead><tr><th>Model</th><th>Date Start</th>';
+    foreach ($typeRents as $type) {
+        printColumnHeaders($type);
+    }
+    echo '<th>TOTAL price HT</th><th>TOTAL price TTC</th><th>Caution price</th><th>EDIT</th><th>DELETE</th></tr></thead><tbody>';
+
+    // Affichage des données
+    foreach ($datas as $key => $data) {
+        echo '<tr><td>'.htmlspecialchars($data['carModel'], ENT_QUOTES, 'UTF-8').'</td>';
+        printRentalData($data,$key, $data['typeRental']);
+    }
+
+    $totalHT = $totalTTC = $totalCaution = 0;
+    foreach ($datas as $data) {
+        if ($data['typeRental'] == "hourly") {
+            $totalHT += $data['carTarifHourHT'] * $data['nbHours'];
+            $totalTTC += ($data['carTarifHourHT'] * $data['nbHours']) * 1.2;
+        } elseif ($data['typeRental'] == "daily") {
+            $totalHT += $data['carTarifDayHT'] * $data['nbDays'];
+            $totalTTC += ($data['carTarifDayHT'] * $data['nbDays']) * 1.2;
+        }
+        $totalCaution += $data['carCaution'];
+    }
+
+    // Affichage des totaux
+    echo '</tbody></table></div></div>';
+    echo '<div class="row mt-4 p-4 container-fluid justify-content-center">
+            <div class="col-8">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>'.$data['carModel'].'</td>
-                            <td>'.$data['reservationDateStart'].'</td>
-                            <td>'.$data['reservationDateEnd'].'</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>'.$data['nbDays'].'</td>
-                            <td>'.$data['carTarifDayHT'].'</td>
-                            <td>'.$data['carTarifDayHT']*1.2.'</td>
-                            <td>'.$data['carTarifDayHT']* $data['nbDays'].'</td>
-                            <td>'.($data['carTarifDayHT']* $data['nbDays']) *1.2.'</td>
-                            <td>'.$data['carCaution'].'</td>
-                            <td><a href="http://donkeycar.com/pages/customer/pageEditBasket.php?id='.$key.'">EDIT</a></td>
-                            <td><a href="http://donkeycar.com/action/customer/actionDeleteBasket.php?id='.$key.'">DELETE</a></td>
+                            <th>TOTAL HT</th>
+                            <th>TOTAL TTC</th>
+                            <th>TOTAL CAUTION</th>
+                            <th>TOTAL TTC + CAUTION</th>
                         </tr>
-                        ');
-                    }
-                    elseif($data['typeRental'] == "hourly") {
-                        echo ('
+                    </thead>
+                    <tbody>
                         <tr>
-                            <td>'.$data['carModel'].'</td>
-                            <td>'.$data['reservationDate'].'</td>
-                            <td></td>
-                            <td>'.$data['nbHours'].'</td>
-                            <td>'.$data['carTarifHourHT'].'</td>
-                            <td>'.$data['carTarifHourHT']*1.2.'</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>'.$data['carTarifHourHT']* $data['nbHours'].'</td>
-                            <td>'.($data['carTarifHourHT']* $data['nbHours']) *1.2.'</td>
-                            <td>'.$data['carCaution'].'</td>
-                            <td><a href="http://donkeycar.com/pages/customer/pageEditBasket.php?id='.$key.'">EDIT</a></td>
-                            <td><a href="http://donkeycar.com/action/customer/actionDeleteBasket.php?id='.$key.'">DELETE</a></td>
+                            <td>'.htmlspecialchars($totalHT, ENT_QUOTES, 'UTF-8').'</td>
+                            <td>'.htmlspecialchars($totalTTC, ENT_QUOTES, 'UTF-8').'</td>
+                            <td>'.htmlspecialchars($totalCaution, ENT_QUOTES, 'UTF-8').'</td>
+                            <td>'.htmlspecialchars($totalTTC + $totalCaution, ENT_QUOTES, 'UTF-8').'</td>
                         </tr>
-                        ');
-                    }
-                    
-                }
-            }
-            if(empty($_SESSION['tabTotal'])){
-                $totalHT = 0;
-                $totalTTC = 0;
-                $totalCaution = 0;
-                foreach($datas as $data){
-                    if($data['typeRental'] == "hourly"){
-                        $totalHT += ($data['carTarifHourHT']* $data['nbHours']);
-                        $totalTTC += ($data['carTarifHourHT']* $data['nbHours']) *1.2;
-                    }
-                    elseif($data['typeRental'] == "daily") {
-                        $totalHT += ($data['carTarifDayHT']* $data['nbDays']);
-                        $totalTTC += ($data['carTarifDayHT']* $data['nbDays']) *1.2;
-                    }
-                    $totalCaution += $data['carCaution'];
-                }
-                $total = $totalTTC + $totalCaution;
-            }
-            else {
-                $totalHT = $_SESSION['tabTotal']['totalHT'];
-                $totalTTC = $_SESSION['tabTotal']['totalTTC'];
-                $totalCaution = $_SESSION['tabTotal']['totalCaution'];
-                $total = $_SESSION['tabTotal']['total'];
-            }
-            
-    echo ('
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="row mt-4 p-4 container-fluid justify-content-center">
-        <div class="col-8">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>TOTAL HT</th>
-                        <th>TOTAL TTC</th>
-                        <th>TOTAL CAUTION</th>
-                        <th>TOTAL TTC + CAUTION</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>');
-                        echo "<td>".$totalHT."</td>";
-                        echo "<td>".$totalTTC."</td>";
-                        echo "<td>".$totalCaution."</td>";
-                        echo "<td>".$total."</td>";
-                echo ('
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    ');
-    $tabTotal = array();
-    $tabTotal['totalHT'] = $totalHT;
-    $tabTotal['totalTTC'] = $totalTTC;
-    $tabTotal['totalCaution'] = $totalCaution;
-    $tabTotal['total'] = $total;
-    $_SESSION['tabTotal'] = $tabTotal;
-    echo ('
-    <div class="col-md-12">
+                    </tbody>
+                </table>
+            </div>
+        </div>';
+
+    // Mise à jour de la session
+    $_SESSION['tabTotal'] = array(
+        'totalHT' => $totalHT,
+        'totalTTC' => $totalTTC,
+        'totalCaution' => $totalCaution,
+        'total' => $totalTTC + $totalCaution
+    );
+
+    // Formulaire de validation du panier
+    echo '<div class="col-md-12">
             <form action="http://donkeycar.com/action/customer/actionSendRent.php" method="POST"> 
                 <div class="row justify-content-center mt-3 mb-5">
                     <div class="col-md-2">
                         <input type="submit" class="btn btn-primary btn-block" value="Valide my basket" name="sendAskRent">
                     </div>
-                    </div>
                 </div>
-        </form>
-    </div>
-    ');
+            </form>
+        </div>';
+
+
+    echo '</tbody></table></div></div>';
 }
+
 
 // function delete User
 
@@ -900,16 +838,16 @@ function verifDateValid ($start, $end){
     $dayEnd = substr($end, 8, 2);
     $nbDays = null;
     if($yearStart > $yearEnd){
-        $_SESSION['messageError'] = "The end date must be greater than the start date";
+        $_SESSION['messageError'] = "The start year is > at  the end year";
     }
     elseif($yearStart == $yearEnd && $monthStart > $monthEnd){
-        $_SESSION['messageError'] = "The end date must be greater than the start date";
+        $_SESSION['messageError'] = "The start month is > at the end month";
     }
     elseif($yearStart == $yearEnd && $monthStart == $monthEnd && $dayStart > $dayEnd){
-        $_SESSION['messageError'] = "The end date must be greater than the start date";
+        $_SESSION['messageError'] = "The start day is > at the end day";
     }
     elseif($yearStart == $yearEnd && $monthStart == $monthEnd && $dayStart == $dayEnd){
-        $_SESSION['messageError'] = "The end date must be greater than the start date";
+        $_SESSION['messageError'] = "The start date and the end date are the same";
     }
     elseif($yearStart == $yearEnd && $monthStart == $monthEnd && $dayStart < $dayEnd){
         $days = $dayEnd - $dayStart;

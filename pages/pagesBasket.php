@@ -5,7 +5,6 @@ include('../layout/header.php');
 $nbRents = null;
 $datasRents = null;
 
-
 if(!empty($_SESSION['nbDataRent'])){
     $nbRents = $_SESSION['nbDataRent'];
     $datasRents = $_SESSION['allDataRents'];

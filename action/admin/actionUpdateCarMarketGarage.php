@@ -1,9 +1,5 @@
 <?php
 require('../action.php');
-print_r($_POST);
-echo '<br>';
-print_r($_GET);
-echo '<br>';
 
 if($_SERVER["REQUEST_METHOD"] === "POST"){
     $idGet = $_GET['id'];

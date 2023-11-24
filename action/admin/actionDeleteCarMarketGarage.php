@@ -1,8 +1,5 @@
 <?php
 require('../action.php');
-print_r($_POST);
-print_r($_GET);
-print_r($_SESSION['user']);
 if($_SESSION['user']['role'] == 'admin'){
     $idGet = $_GET['id'];
     $type =$_GET['type'];

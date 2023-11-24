@@ -3,7 +3,7 @@ require('../action.php');
 $id = $_GET['id'];
 $nbData = count($_SESSION['allDataRents']);
 $datasrents = $_SESSION['allDataRents'][$id];
-if(empty($id)){
+if(isset($_GET['id'])){
     if($nbData === 1){
         unset($_SESSION['allDataRents']);
         unset($_SESSION['nbDataRent']);

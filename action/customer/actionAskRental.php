@@ -23,40 +23,54 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
     elseif(isset($_POST['validerentalDate'])){
         $datasRents = $_SESSION['dataRents'];
         if($_GET['step'] == "hourly"){
-            $datasRents['reservationDate'] = $_POST['reservationDate'];
-            $datasRents['carTarifHourHT'] = $_POST['carTarifHourHT'];
-            $datasRents['reservationHourStart'] = $_POST['reservationHourStart'];
-            $datasRents['reservationHourEnd'] = $_POST['reservationHourEnd'];
-            $hourStart = intval(substr($_POST['reservationHourStart'], 0, 2));
-            $hourEnd = intval(substr($_POST['reservationHourEnd'], 0, 2));
-            $nbHours = $hourEnd - $hourStart;
-            if($nbHours < 0){
-                $_SESSION['messageError'] = "The end time must be greater than the start time";
+            if(verifIsHourly($_POST['reservationDate'], $_POST['reservationHourStart'], $_POST['reservationHourEnd'], $_GET['id'])){
+                $datasRents['reservationDate'] = $_POST['reservationDate'];
+                $datasRents['carTarifHourHT'] = $_POST['carTarifHourHT'];
+                $datasRents['reservationHourStart'] = $_POST['reservationHourStart'];
+                $datasRents['reservationHourEnd'] = $_POST['reservationHourEnd'];
+                $hourStart = intval(substr($_POST['reservationHourStart'], 0, 2));
+                $hourEnd = intval(substr($_POST['reservationHourEnd'], 0, 2));
+                $nbHours = $hourEnd - $hourStart;
+                if($nbHours < 0){
+                    $_SESSION['messageError'] = "The end time must be greater than the start time";
+                    header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step=hourly');
+                    exit();
+                }
+                $datasRents['nbHours'] = $nbHours;
+            }else{
+                unset($_SESSION['dataRents']);
+                $_SESSION['messageError'] = "The car is not available at this time";
                 header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step=hourly');
                 exit();
             }
-            $datasRents['nbHours'] = $nbHours;
-
-        }else {
-            $datasRents['reservationDateStart'] = $_POST['reservationDateStart'];
-            $datasRents['reservationDateEnd'] = $_POST['reservationDateEnd'];
-            $datasRents['carTarifDayHT'] = $_POST['carTarifDayHT'];
-            if(verifDateValid ($_POST['reservationDateStart'], $_POST['reservationDateEnd']) != false){
-                $datasRents['nbDays'] = verifDateValid($_POST['reservationDateStart'], $_POST['reservationDateEnd']);
-            }
-            else {
-                $_SESSION['messageError'] = "The end date must be greater than the start date";
+        } else {
+            if(verifIsDaily($_POST['reservationDateStart'], $_POST['reservationDateEnd'], $_SESSION['dataRents']['carId'])){
+                $datasRents['reservationDateStart'] = $_POST['reservationDateStart'];
+                $datasRents['reservationDateEnd'] = $_POST['reservationDateEnd'];
+                $datasRents['carTarifDayHT'] = $_POST['carTarifDayHT'];
+                if(verifDateValid ($_POST['reservationDateStart'], $_POST['reservationDateEnd']) != false){
+                    $datasRents['nbDays'] = verifDateValid($_POST['reservationDateStart'], $_POST['reservationDateEnd']);
+                }
+                else {
+                    header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step=daily');
+                    exit();
+                }
+            }else{
+                $_SESSION['messageError'] = "The car is not available at this time";
                 header('Location: ../../pages/customer/pageAskRental.php?id='.$id.'&step=daily');
                 exit();
             }
-            
         }
-        unset($_SESSION['dataRents']);
+        if(!isset($_SESSION['allDataRents'])){
+            $_SESSION['allDataRents'] = [];
+            $_SESSION['nbDataRent'] = 0;
+        }
         $saveDatasRents = $_SESSION['allDataRents'];
         $saveDatasRents[] = $datasRents;
         $_SESSION['allDataRents'] = $saveDatasRents;
         $_SESSION['messageRental'] = "You have chosen a rental from ".$datasRents['reservationDateStart']." to ".$datasRents['reservationDateEnd'];
         $_SESSION['nbDataRent'] +=1;
+        unset($_SESSION['dataRents']);
         header('Location: ../../index.php');    
     }
 }else {

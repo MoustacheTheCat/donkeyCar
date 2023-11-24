@@ -3,7 +3,6 @@ require('../../action/action.php');
 $pageTitle = 'List of all rental';
 include('../../layout/header.php');
 $id = $_SESSION['user']['id'];
-print_r($id);
 $dataRents = getValidRent($id);
 
 ?>

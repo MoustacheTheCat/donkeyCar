@@ -65,12 +65,16 @@
                                         <?php endif;?>
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMarket">
-                                        <li><a class="dropdown-item" href="http://donkeycar.com/pages/pageListMessage.php">
-                                            <?php if(countMessageNoRead() != 0):?>
-                                                <span class="badge bg-dark text-white rounded-pill cart-items"><?= countMessageNoRead()?></span>
-                                            <?php endif;?>
-                                            Message
-                                        </a></li>
+                                        <?php if(empty($_SESSION)|| (!empty($_SESSION['user']['role']) && $_SESSION['user']['role'] == 'admin')):?>
+                                            <li>
+                                                <a class="dropdown-item" href="http://donkeycar.com/pages/pageListMessage.php">
+                                                <?php if(countMessageNoRead() != 0):?>
+                                                    <span class="badge bg-dark text-white rounded-pill cart-items"><?= countMessageNoRead()?></span>
+                                                <?php endif;?>
+                                                Message
+                                                </a>
+                                            </li>
+                                        <?php endif;?>
                                         <?php if($_SESSION['user']['role'] == 'customer') :?>
                                             <li><a class="dropdown-item" href="http://donkeycar.com/pages/pagesListRental.php?role=customer"> My Rental</a></li>
                                         <?php endif;?>

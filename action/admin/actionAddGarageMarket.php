@@ -1,7 +1,6 @@
 <?php
 require('../../action/action.php');
 if($_SERVER["REQUEST_METHOD"] === "POST"){
-    print_r($_POST);
     $messageEmpty = array();
     if(empty($_POST['marketName'])){
         $messageEmpty['marketName'] =  "You have not provided your market name";

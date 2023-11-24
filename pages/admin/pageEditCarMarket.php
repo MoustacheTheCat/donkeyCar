@@ -10,7 +10,6 @@ if(!empty($_GET['type']) &&  !empty($_GET['id'])){
     }elseif($_GET['type'] == 'car'){
         echo "car";
         $car = getOneRowCarWithTypeAndBrand($idGet);
-        print_r($car);
     }
 
 }

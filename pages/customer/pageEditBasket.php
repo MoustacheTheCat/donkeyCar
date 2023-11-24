@@ -4,7 +4,6 @@ $id = $_GET['id'];
 $data = $_SESSION['allDataRents'][$id];
 $pageTitle = 'Update your rent';
 include('../../layout/header.php');
-print_r($data);
 ?>
 <style><?php include('../../css/layout.css')?></style>
 <div class="container-fluid md-2">

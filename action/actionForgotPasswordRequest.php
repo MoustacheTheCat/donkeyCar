@@ -7,11 +7,9 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
             if($_POST['email'] == substr($emailVerif, 3)){
                 if(substr($emailVerif,0,2)<10){
                     $id = substr($emailVerif,1,1);
-                    print_r($id);
                 }
                 else {
                     $id = substr($emailVerif,0,2);
-                    print_r($id);
                 }
                 $to = $_POST['email'];
                 $subject = "Forgot Password";
